@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://[username]:[password]@localhost:3306/[dbName]"
+}
+
+model Token {
+  id              Int         @id @default(autoincrement())
+  name            String      
+  stable          String
+  precision       Float
+  isActive        Boolean     @default(true)
+  tokenDatas      TokenData[]
+  rootOrders      RootOrder[]
+  targets         Target[]
+  tokenStrategies TokenStrategy[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Target {
+  id         Int       @id @default(autoincrement())
+  percent    Float
+  stopLosses StopLoss[]
+  rootOrder  RootOrder[]
+  tokenId    Int?
+  token      Token?    @relation(fields: [tokenId], references: [id])
+  strategyId Int?
+  strategy   Strategy? @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model StopLoss {
+  id          Int      @id @default(autoincrement())
+  percent     Float
+  qtyPercent  Float
+  targetId    Int?
+  target      Target?  @relation(fields: [targetId], references: [id], onDelete: SetNull)
+  subOrders   SubOrder[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model RootOrder {
+  id          Int      @id @default(autoincrement())
+  orderId     String   @unique
+  side        Side
+  timestamp   String
+  entryPrice  Float
+  qty         Float
+  budget      Float
+  status      Status  @default(ACTIVE)
+  profit      Float?
+  markPrice   Float?
+  subOrders   SubOrder[]
+  strategyId  Int
+  strategy    Strategy? @relation(fields: [strategyId], references: [id])
+  currentTargetId Int?
+  target      Target? @relation(fields: [currentTargetId], references: [id], onDelete: SetNull)
+  tokenId     Int?
+  token       Token?   @relation(fields: [tokenId], references: [id])
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model SubOrder {
+  id          Int       @id @default(autoincrement())
+  orderId     String    @unique
+  side        Side
+  markPrice   Float
+  timestamp   String
+  qty         Float
+  budget      Float
+  status      Status    @default(ACTIVE)
+  profit      Float?
+  stopLossId  Int?
+  stopLosses  StopLoss? @relation(fields: [stopLossId], references: [id])
+  rootOrderId Int?
+  rootOrder   RootOrder? @relation(fields: [rootOrderId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Strategy {
+  id              Int      @id @default(autoincrement())
+  description     String
+  contribution    Int      @default(0)
+  tokenStrategies TokenStrategy[]
+  targets         Target[]
+  rootOrder       RootOrder[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model TokenStrategy {
+  id         Int       @id @default(autoincrement())
+  tokenId    Int?
+  token      Token?    @relation(fields: [tokenId], references: [id])
+  strategyId Int?
+  strategy   Strategy? @relation(fields: [strategyId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model TokenData {
+  id         Int       @id @default(autoincrement())
+  open       Float
+  close      Float
+  high       Float
+  low        Float
+  volume     Float
+  indicators String
+  tokenId    Int?
+  token      Token?   @relation(fields: [tokenId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum Side {
+  SELL
+  BUY
+}
+
+enum Status {
+  ACTIVE
+  EXPIRED
+  FINISHED
+}

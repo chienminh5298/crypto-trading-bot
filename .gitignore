@@ -1,0 +1,6 @@
+node_modules
+./prisma/create_schema.txt
+./Dockerfile
+./Dockerfile.dev
+./.dockerignore
+# Keep environment variables out of version control

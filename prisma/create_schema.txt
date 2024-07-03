@@ -1,0 +1,6 @@
+*** Để cập nhật prisma schema mà không mất data thì sau khi cập nhật xong chạy lệnh: npx prisma db push
+
+Để khởi tạo schema thì chuẩn bị file schema.prisma theo đường dẫn /src/prisma rồi chạy lệnh sau:
+npx prisma migrate dev --schema=./prisma/schema.prisma
+
+

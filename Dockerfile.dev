@@ -1,0 +1,11 @@
+FROM node:lts as builder
+
+# Create app directory
+WORKDIR /app
+
+# Install app dependencies
+COPY package*.json ./
+
+COPY . .
+
+CMD [ "npm", "start" ]
